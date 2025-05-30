@@ -43,7 +43,7 @@ func main() {
 		err = json.Unmarshal(res, &data)
 		handleError("Erro ao fazer parse da resposta: %v\n", err)
 
-		file, err := os.Create("cidade.txt")
+		file, err := os.Create(cep +".txt")
 		handleError("Erro ao criar arquivo: %v\n", err)
 
 		defer file.Close()
