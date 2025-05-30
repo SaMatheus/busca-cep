@@ -22,32 +22,29 @@ type ViaCEP struct {
 	Complemento string `json:"complemento"`
 }
 
+func handleError(feedback string, err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, feedback, err)
+	}
+}
+
 func main() {
 	for _, cep := range os.Args[1:] {
 		req, err := http.Get("http://viacep.com.br/ws/" + cep + "/json/")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao fazer requisição: %v\n", err)
-		}
+		handleError("Erro ao fazer requisição: %v\n", err)
 
 		defer req.Body.Close()
 
 		res, err := io.ReadAll(req.Body)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao ler resposta: %v\n", err)
-		}
+		handleError("Erro ao ler resposta: %v\n", err)
 
 		var data ViaCEP
 
 		err = json.Unmarshal(res, &data)
+		handleError("Erro ao fazer parse da resposta: %v\n", err)
 
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao fazer parse da resposta: %v\n", err)
-		}
-
-		file, erro := os.Create("cidade.txt")
-		if erro != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao criar arquivo: %v\n", erro)
-		}
+		file, err := os.Create("cidade.txt")
+		handleError("Erro ao criar arquivo: %v\n", err)
 
 		defer file.Close()
 
@@ -56,9 +53,7 @@ func main() {
 				data.Cep, data.Logradouro, data.Bairro, data.Localidade, data.Uf,
 			),
 		)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Erro ao escrever no arquivo: %v\n", err)
-		}
+		handleError("Erro ao escrever no arquivo: %v\n", err)
 
 		fmt.Println("Arquivo criado com sucesso!")
 
